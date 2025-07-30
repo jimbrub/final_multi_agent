@@ -1,0 +1,15 @@
+strands-agents
+strands-agents-builder
+strands-agents-tools@git+https://github.com/strands-agents/tools.git
+feedparser
+html2text
+matplotlib
+graphviz
+networkx
+diagrams
+nest-asyncio
+playwright
+opencv-python
+psutil
+pyautogui
+pytesseract
