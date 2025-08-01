@@ -13,3 +13,12 @@ opencv-python
 psutil
 pyautogui
 pytesseract
+markitdown[all]
+# Premium UI Components
+rich>=13.7.0                # Advanced terminal formatting
+halo>=0.0.31                # Beautiful spinners
+colorama>=0.4.6             # Cross-platform colored output
+
+# Enhanced Input/Output
+click>=8.1.0                # Better CLI argument parsing
+prompt-toolkit>=3.0.0       # Advanced input handling
