@@ -6,7 +6,7 @@ from botocore.config import Config
 from strands import Agent
 from strands.models import BedrockModel
 from strands_tools import use_computer
-import os
+import os, time
 # from strands_agents_builder.utils.kb_utils import load_system_prompt, store_conversation_in_kb
 
 # Configure logging to show INFO level logs
@@ -33,7 +33,6 @@ model = BedrockModel(
 knowledge_base_id = os.getenv("STRANDS_KNOWLEDGE_BASE_ID")
 
 system_prompt = """
-Always set send_screenshot=true
 
 for opening apps use the tools open_app action
 
@@ -91,7 +90,32 @@ def use_computer_agent(query: str) -> str:
         with suggested alternatives.
     """
     # Format the query for the computer use agent with clear instructions
-    os.environ["BYPASS_TOOL_CONSENT"] = "true"  
+    os.environ["BYPASS_TOOL_CONSENT"] = "true" 
+    computer_agent = Agent(
+            system_prompt=system_prompt,
+            model=model,
+            tools=[use_computer],
+        )
+    start_my_day=False
+    if "start my day" in query.lower():
+        start_my_day=True
+        setup(computer_agent)
+        # query = "we have just opened kiro and we are on it in full screen, can you click on open a project, then can you click on users, then click on jambrubu, then scroll down on the right side of menu, click on workplace, then click testing_ag_ui, then click open"
+        #query = "we have slack open, can you click on the strands agents interest channel then right click on one of the messages, then click on reply in thread. from the thread info type a response but let me hit enter"
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Daily setup has been successful! No further computer assistance is needed right now.\n{'='*50}"
+    if "start demo record" in query.lower():
+        print("entered dem record if statement")
+        setup_recording(computer_agent)
+        # Return immediately after setting up recording - no need to continue processing
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Screen recording has been started successfully! Recording is now active.\n\n🎬 Screen Studio is now recording your screen.\n📹 Recording setup completed - you can proceed with your demo.\n\n⚠️  Note: The screen is recording and no further computer assistance is needed right now.\n{'='*50}"
+    if "start focus mode" in query.lower():
+        focus_mode(computer_agent)
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Focus mode has been entered successfully! Note: Focus is entered, no further computer assistance is needed right now.\n{'='*50}"
+    if "stop demo record" in query.lower():
+        print("entered demo stop is statement")
+        stop_recording(computer_agent)
+        # Return immediately after stopping recording - no need to continue processing
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Screen recording has been stopped successfully! Recording is now inactive.\n\n🎬 Screen Studio recording has been stopped.\n📹 Recording stop completed.\n\n⚠️  Note: Recording has ended and no further computer assistance is needed right now.\n{'='*50}"
     formatted_query = f"""
     Please help me with the following computer automation task. Remember to:
     1. Analyze screen elements carefully before interactions
@@ -105,13 +129,11 @@ def use_computer_agent(query: str) -> str:
     try:
         print("Executing Computer Automation Task")
         # Create the computer use agent with use_computer capability
-        computer_agent = Agent(
-            system_prompt=system_prompt,
-            model=model,
-            tools=[use_computer],
-        )
+        
         agent_response = computer_agent(formatted_query)
         text_response = str(agent_response)
+        #if start_my_day==True:
+        
 
         if len(text_response) > 0:
             return f"\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n{text_response}\n{'='*50}"
@@ -121,7 +143,76 @@ def use_computer_agent(query: str) -> str:
         # Return specific error message for computer automation processing
         return f"Computer Automation Error: {str(e)}\nPlease check your request and try again."
 
-        
+    
+def focus_mode(agent):
+    agent.tool.use_computer(action="move_mouse", x=1360, y=18) #contol center
+    time.sleep(.3)
+    # agent.tool.use_computer(action="click", x=1360, y=18) 
+    agent.tool.use_computer(action="click", x=1360, y=18)
+    time.sleep(.5)
+    agent.tool.use_computer(action="move_mouse",x=1386, y=85) #do not disturb
+    agent.tool.use_computer(action="click",x=1386, y=85) #do not disturb
+    time.sleep(.3)
+    agent.tool.use_computer(action="open_app", app_name="clock") 
+    time.sleep(1) 
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right")
+    time.sleep(.3)
+    agent.tool.use_computer(action="click",x=1270, y=62) #timer
+    time.sleep(.3)    
+    # agent.tool.use_computer(action="click",x=1485, y=64) #add timer
+    agent.tool.use_computer(action="move_mouse",x=1129, y=344) #number
+    time.sleep(.3)   
+    agent.tool.use_computer(action="click",x=1129, y=344) #number
+    time.sleep(1)   
+    agent.tool.use_computer(action="click",x=1129, y=344) #number 
+    time.sleep(1)   
+    agent.tool.use_computer(action="type", text="25")
+    time.sleep(.3)    
+    agent.tool.use_computer(action="click",x=1218, y=633) #start
+
+ 
+
+def setup(agent):
+    agent.tool.use_computer(action="open_app", app_name="Google Chrome")
+    # time.sleep(1) 
+    
+    time.sleep(1)
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right")
+    time.sleep(1)
+    agent.tool.use_computer(action="move_mouse", x=860, y=136)
+    time.sleep(1)
+    agent.tool.use_computer(action="click", x=860, y=136)
+    
+    time.sleep(1)
+    agent.tool.use_computer(action="open_app", app_name="Slack")
+    time.sleep(1)
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+left") 
+
+    # agent.tool.use_computer(action="open_app", app_name="Microsoft Outlook")
+    # time.sleep(1)
+    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="ctrl+command")
+    # time.sleep(1)
+    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="ctrl+command+f")
+    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="command+2") # for calendar
+    
+
+    agent.tool.use_computer(action="open_app", app_name="Visual Studio Code")
+    time.sleep(1)
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+command+f")
+
+def setup_recording(agent):
+    agent.tool.use_computer(action="open_app", app_name="Screen Studio")
+    agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="option+command")
+    agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="option+command+3")
+    # interactive_agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="ctrl+command+shift+s")
+    time.sleep(1)
+    agent.tool.use_computer(action="click", x=747, y=547) 
+    
+    # interactive_agent.tool.use_computer(action="click", app_name="clock", x=1028, y=914)
+def stop_recording(agent):
+    agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="option+command")
+    agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="ctrl+command+shift+s")
 # Interactive loop for standalone usage
 if __name__ == "__main__":
     print(f"\n\033[1;36m🌟 Computer Automation Agent 🌟\033\n")
@@ -139,6 +230,17 @@ if __name__ == "__main__":
         if user_input.lower() == "exit":
             print("\n\033[1;36mGoodbye! 👋\033[0m")
             break
+        elif user_input.lower() == "setup":
+            setup(interactive_agent)
+            user_input="you just setup my timer, thanks!"
+        elif user_input.lower() == "start demo record":
+            setup_recording(interactive_agent)
+            user_input="you just set up and started recording my screen, thanks!"
+            break
+        elif user_input.lower() == "stop demo record":
+            stop_recording(interactive_agent)
+            break
+
             
         # Use ANSI color codes to make the agent's response stand out
         print("\n\033[1;36m--- Agent Response ---\033[0m")  # Cyan color, bold text

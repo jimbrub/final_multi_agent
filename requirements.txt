@@ -22,3 +22,27 @@ colorama>=0.4.6             # Cross-platform colored output
 # Enhanced Input/Output
 click>=8.1.0                # Better CLI argument parsing
 prompt-toolkit>=3.0.0       # Advanced input handling
+
+# # AG UI Client Tool Dependencies
+
+# # Core async HTTP client
+# aiohttp>=3.8.0
+
+# # WebSocket support
+# websockets>=11.0.0
+
+# # Strands agents framework
+# strands
+
+# # Optional: Enhanced JSON handling
+# ujson>=5.0.0
+
+# # Optional: Better performance for async operations
+# uvloop>=0.17.0; sys_platform != "win32"
+
+# # Development dependencies (optional)
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+# pytest-mock>=3.10.0
+# black>=23.0.0
+# mypy>=1.0.0

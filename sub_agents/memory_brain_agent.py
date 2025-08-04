@@ -1,6 +1,6 @@
 from strands import Agent, tool
 from strands_tools import memory, use_aws, retrieve
-from markitdown_memory_tool import markitdown_convert
+from .markitdown_memory_tool import markitdown_convert
 import os
 
 memory_system_prompt = '''
