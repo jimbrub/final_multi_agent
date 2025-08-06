@@ -51,8 +51,6 @@ Always provide clear explanations of your process and the visual content you're 
 """
 
 
-# Initialize the Strands Agent with Computer Use capabilities and speech
-
 
 @tool
 def content_generator_agent(query: str) -> str:
@@ -103,6 +101,11 @@ def content_generator_agent(query: str) -> str:
         query: "Generate an image of a futuristic city skyline"
         query: "Create an illustration of a data flow process"
     """
+    content_agent = Agent(
+        system_prompt=system_prompt,
+        tools=[diagram, generate_image],
+    )
+    
     # Format the query for the content generator with clear instructions
     formatted_query = f"""
     Please help me create the following visual content. I will:
@@ -118,10 +121,6 @@ def content_generator_agent(query: str) -> str:
     try:
         print("🎨 Initiating Content Generation Process")
         # Create the content generator agent with both tools
-        content_agent = Agent(
-            system_prompt=system_prompt,
-            tools=[diagram, generate_image],
-        )
         agent_response = content_agent(formatted_query)
         text_response = str(agent_response)
 
@@ -152,6 +151,8 @@ if __name__ == "__main__":
         if user_input.lower() == "exit":
             print("\n\033[1;36m👋 Thanks for using Content Generator Agent! Goodbye!\033[0m")
             break
+        if user_input.lower() == "diagram examples":
+           create_examples_for_all_diagrams(interactive_agent) 
             
         # Use ANSI color codes to make the agent's response stand out
         print("\n\033[1;36m--- 🎨 Content Generator Response ---\033[0m")  # Cyan color, bold text

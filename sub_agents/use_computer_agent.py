@@ -96,13 +96,11 @@ def use_computer_agent(query: str) -> str:
             model=model,
             tools=[use_computer],
         )
-    start_my_day=False
     if "start my day" in query.lower():
-        start_my_day=True
         setup(computer_agent)
         # query = "we have just opened kiro and we are on it in full screen, can you click on open a project, then can you click on users, then click on jambrubu, then scroll down on the right side of menu, click on workplace, then click testing_ag_ui, then click open"
         #query = "we have slack open, can you click on the strands agents interest channel then right click on one of the messages, then click on reply in thread. from the thread info type a response but let me hit enter"
-        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Daily setup has been successful! No further computer assistance is needed right now.\n{'='*50}"
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n\n✅ Daily setup has been successful! All the user needs to do is touch their security key and your computer should be ready for today's work! No further computer assistance is needed right now.\n"
     if "start demo record" in query.lower():
         print("entered dem record if statement")
         setup_recording(computer_agent)
@@ -145,13 +143,13 @@ def use_computer_agent(query: str) -> str:
 
     
 def focus_mode(agent):
-    agent.tool.use_computer(action="move_mouse", x=1360, y=18) #contol center
+    agent.tool.use_computer(action="move_mouse", x=1344, y=17) #contol center
     time.sleep(.3)
     # agent.tool.use_computer(action="click", x=1360, y=18) 
-    agent.tool.use_computer(action="click", x=1360, y=18)
+    agent.tool.use_computer(action="click", x=1344, y=17)
     time.sleep(.5)
-    agent.tool.use_computer(action="move_mouse",x=1386, y=85) #do not disturb
-    agent.tool.use_computer(action="click",x=1386, y=85) #do not disturb
+    agent.tool.use_computer(action="move_mouse",x=1386, y=86) #do not disturb
+    agent.tool.use_computer(action="click",x=1386, y=86) #do not disturb
     time.sleep(.3)
     agent.tool.use_computer(action="open_app", app_name="clock") 
     time.sleep(1) 
@@ -173,33 +171,79 @@ def focus_mode(agent):
  
 
 def setup(agent):
-    agent.tool.use_computer(action="open_app", app_name="Google Chrome")
-    # time.sleep(1) 
+    agent.tool.use_computer(action="open_app", app_name="Chrome")
+    # # time.sleep(1) 
     
-    time.sleep(1)
+    # # time.sleep(1)
     agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
     agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right")
-    time.sleep(1)
+    # time.sleep(5) 
+
+    # time.sleep(1)
     agent.tool.use_computer(action="move_mouse", x=860, y=136)
-    time.sleep(1)
+    time.sleep(2)
     agent.tool.use_computer(action="click", x=860, y=136)
-    
-    time.sleep(1)
+
+    #click on plus button
+    agent.tool.use_computer(action="move_mouse", x=1100, y=58)
+    agent.tool.use_computer(action="click", x=1100, y=58)
+
+
+    # agent.tool.use_computer(action="open_app", app_name="Chrome")
+    # agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
+    # agent.tool.use_computer(action="hotkey", hotkey_str="command+t") 
+    time.sleep(3)
+    agent.tool.use_computer(action="type", text="merlon", app_name="Chrome")
+    time.sleep(3)
+    agent.tool.use_computer(action="key_press", key="enter")
+ 
+    time.sleep(5)
     agent.tool.use_computer(action="open_app", app_name="Slack")
     time.sleep(1)
-    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+left") 
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+left")
 
-    # agent.tool.use_computer(action="open_app", app_name="Microsoft Outlook")
-    # time.sleep(1)
-    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="ctrl+command")
-    # time.sleep(1)
-    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="ctrl+command+f")
-    # agent.tool.use_computer(action="hotkey", app_name="Microsoft Outlook", hotkey_str="command+2") # for calendar
+    agent.tool.use_computer(action="hotkey", hotkey_str="command+g") 
+    time.sleep(1)
+    agent.tool.use_computer(action="type", text="stran")
+    agent.tool.use_computer(action="click", x=225, y=120)
+
+    time.sleep(1)
+
     
+# VS Code Setup
 
     agent.tool.use_computer(action="open_app", app_name="Visual Studio Code")
     time.sleep(1)
     agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+command+f")
+
+    time.sleep(1)
+ 
+# mwinit setup
+
+    agent.tool.use_computer(action="open_app", app_name="iTerm")
+
+    time.sleep(2)
+
+    agent.tool.use_computer(action="click", x=135, y=18)
+    agent.tool.use_computer(action="click", x=154, y=54)
+    time.sleep(3)
+
+    agent.tool.use_computer(action="open_app", app_name="iTerm")
+    time.sleep(3)
+
+
+    agent.tool.use_computer(action="type", text="mwinit")
+    time.sleep(1)
+
+    agent.tool.use_computer(action="key_press", app_name="iTerm", key="enter")
+    time.sleep(2)
+
+    agent.tool.use_computer(action="type", text="04132004")
+    time.sleep(2)
+
+    agent.tool.use_computer(action="key_press", key="enter")
+ 
+ 
 
 def setup_recording(agent):
     agent.tool.use_computer(action="open_app", app_name="Screen Studio")
