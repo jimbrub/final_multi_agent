@@ -104,7 +104,7 @@ Priority: Accuracy and reliability over speed. Always verify before acting.
 
 
 # Initialize the Strands Agent with Computer Use capabilities and speech
-
+    
 
 @tool
 def use_browser_agent(query: str) -> str:
@@ -159,6 +159,10 @@ def use_browser_agent(query: str) -> str:
         return f"Browser Automation Error: {str(e)}\nPlease check your request and try again."
 
 
+def start_research(agent):
+    """Start research mode by opening browser and navigating to DuckDuckGo"""
+    agent("Open Chromium browser and navigate to duckduckgo.com for research")
+
 if __name__ == "__main__":
     print(f"\n\033[1;36m🌟 Browser Automation Agent 🌟\033\n")
     print("Available commands:")
@@ -174,6 +178,9 @@ if __name__ == "__main__":
         
         if user_input.lower() == "exit":
             print("\n\033[1;36mGoodbye! 👋\033[0m")
+            break
+        if user_input.lower() == "research mode":
+            start_research(interactive_agent)
             break
             
         print("\n\033[1;36m--- Agent Response ---\033[0m")  # Cyan color, bold text

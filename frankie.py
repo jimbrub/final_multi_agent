@@ -135,6 +135,10 @@ class PremiumSpinnerManager:
 # Global spinner manager
 spinner_manager = PremiumSpinnerManager()
 
+# Research mode state management
+research_mode_active = False
+research_mode_setup_complete = False
+
 def get_system_status():
     """Generate rich system status for premium banner"""
     current_time_str = datetime.now().strftime("%H:%M:%S")
@@ -253,6 +257,21 @@ def show_shortcuts_menu():
         "🎯 Enter focus session",
         "Enables Do Not Disturb + 25min timer"
     )
+    shortcuts_table.add_row(
+        "play my music", 
+        "🎵 Launch music player",
+        "Opens Music app and starts playing"
+    )
+    shortcuts_table.add_row(
+        "start presentation",
+        "📽️ Launch presentation mode",
+        "Opens PowerPoint and starts presentation"
+    )
+    shortcuts_table.add_row(
+        "research mode",
+        "🔬 Multi-step research with Quip option",
+        "Opens browser, researches topic, optional Quip documentation"
+    )
     
     # Usage instructions
     usage_md = """
@@ -265,12 +284,14 @@ Simply type any of the shortcut commands above, and F.R.A.N.K.I.E. will **automa
 - `start my day` - Perfect for morning routine
 - `start demo record` - Quick demo recording setup  
 - `start focus mode` - Pomodoro-style focus session
+- `play my music` - Launch music app instantly
 
 ### ⚡ **Natural Language Support**
 These commands work with natural language variations too:
 - "Can you start my day setup?" ✅ Auto-routed
 - "Please begin demo recording" ✅ Auto-routed  
 - "I want to enter focus mode" ✅ Auto-routed
+- "Open music please" ✅ Auto-routed
 
 ### 🎮 **Explicit Agent Routing**
 Want to combine with other agents? Use explicit routing:
@@ -442,21 +463,24 @@ def handle_shell_command(command):
         duration = time.time() - start_time if 'start_time' in locals() else 0
         spinner_manager.fail_tool("Shell", f"Error: {str(e)}", duration)
 
-def detect_computer_shortcut(user_input):
+def detect_shortcut(user_input):
     """
-    Detect if user input contains a computer agent shortcut.
+    Detect if user input contains a computer shortcut.
     Returns the shortcut command if found, None otherwise.
     
     Does NOT intercept explicit agent routing commands.
     """
     input_lower = user_input.lower().strip()
     
-    # Define shortcuts
-    shortcuts = [
+    # Define computer shortcuts
+    computer_shortcuts = [
         "start my day",
         "start demo record", 
         "stop demo record",
-        "start focus mode"
+        "start focus mode",
+        "play my music",
+        "start presentation",
+        "research mode"
     ]
     
     # Check if it's an explicit routing command - if so, don't intercept
@@ -475,7 +499,7 @@ def detect_computer_shortcut(user_input):
             return None
     
     # Check for direct shortcut matches
-    for shortcut in shortcuts:
+    for shortcut in computer_shortcuts:
         if input_lower == shortcut:
             return shortcut
     
@@ -506,6 +530,15 @@ def detect_computer_shortcut(user_input):
             "begin focus session",
             "start focus session",
             "focus mode please"
+        ],
+        "play my music": [
+            "open music",
+            "start music",
+            "launch music app",
+            "open the music app",
+            "play music",
+            "start playing music",
+            "music please"
         ]
     }
     
@@ -517,8 +550,86 @@ def detect_computer_shortcut(user_input):
     
     return None
 
+def handle_research_mode_workflow():
+    """Handle the multi-step research mode workflow - clean agent output"""
+    
+    try:
+        # Step 1: Browser Agent opens Chromium and DuckDuckGo
+        # Let browser agent handle its own output naturally without F.R.A.N.K.I.E. interference
+        browser_response = use_browser_agent("Open Chromium browser and navigate to duckduckgo.com. Wait for the page to load and be ready for research.")
+        
+        # Step 2: Computer Agent sets up research environment  
+        # Let computer agent handle its own output naturally without F.R.A.N.K.I.E. interference
+        computer_response = use_computer_agent("research mode")
+        
+        # Only F.R.A.N.K.I.E. message: Simple completion notice
+        console.print()
+        console.print(Panel(
+            "[bold green]🎯 Research Mode Complete![/bold green]\n\n"
+            "[bold yellow]Please tell me what topic you'd like to research![/bold yellow]\n\n"
+            "[dim]Note: After research, you'll have the option to document findings in Quip.[/dim]",
+            title="[highlight]📋 Ready for Research Topic[/highlight]",
+            border_style="green",
+            box=ROUNDED,
+            padding=(1, 2)
+        ))
+        
+        # Set global flag to indicate research mode setup is complete
+        global research_mode_setup_complete
+        research_mode_setup_complete = True
+        
+        return True
+        
+    except Exception as e:
+        # Only show F.R.A.N.K.I.E. error handling if something fails
+        console.print()
+        console.print(Panel(
+            f"[danger]Error setting up research mode:[/danger]\n[danger]Error:[/danger] {str(e)}\n\n"
+            "[warning]💡 Falling back to computer agent research mode setup...[/warning]",
+            title="[danger]❌ Research Mode Error[/danger]",
+            border_style="red",
+            box=ROUNDED,
+            padding=(1, 2)
+        ))
+        
+        # Fallback to just computer agent setup
+        return fallback_to_computer_research_mode()
+
+def fallback_to_computer_research_mode():
+    """Fallback to just computer agent research mode if browser setup fails"""
+    
+    try:
+        # Let computer agent handle its own output naturally without F.R.A.N.K.I.E. interference
+        response = use_computer_agent("research mode")
+        
+        # Set global flag to indicate research mode setup is complete (fallback)
+        global research_mode_setup_complete
+        research_mode_setup_complete = True
+        
+        return True
+        
+    except Exception as e:
+        # Only show F.R.A.N.K.I.E. error if computer agent also fails
+        console.print()
+        console.print(Panel(
+            f"[danger]Research mode setup failed:[/danger] {str(e)}",
+            title="[danger]❌ Setup Failed[/danger]",
+            border_style="red",
+            box=ROUNDED,
+            padding=(1, 2)
+        ))
+        return False
+
 def route_shortcut_to_computer(shortcut_command):
     """Route a detected shortcut directly to the computer agent"""
+    
+    if shortcut_command == "research mode":
+        # Special multi-step research mode workflow - no F.R.A.N.K.I.E. routing messages
+        # Let agents handle their own output naturally
+        return handle_research_mode_workflow()
+    
+    # For non-research shortcuts, show F.R.A.N.K.I.E. routing message
+    console.print(f"[highlight]⚡ Auto-routing shortcut:[/highlight] `{shortcut_command}`")
     
     spinner_manager.start_tool_spinner("Computer Agent", f"Executing shortcut: {shortcut_command}")
     
@@ -552,6 +663,103 @@ def route_shortcut_to_computer(shortcut_command):
             title="[danger]❌ Shortcut Error[/danger]",
             border_style="red",
             box=ROUNDED
+        ))
+        return False
+
+def clear_research_mode_state():
+    """Clear the research mode state flags"""
+    global research_mode_setup_complete, research_mode_active
+    research_mode_setup_complete = False
+    research_mode_active = False
+
+def handle_post_research_mode_input(user_input):
+    """Handle user input after research mode setup is complete - with Quip integration option"""
+    global research_mode_setup_complete
+    
+    # Clear the flag
+    research_mode_setup_complete = False
+    
+    # Route directly to browser agent and capture the research output
+    try:
+        # Format research query for browser agent
+        research_query = f"Research this topic using DuckDuckGo: {user_input}. Provide comprehensive information and key findings. Please avoid creating multiple tabs"
+        
+        # Route to browser agent for research - let it handle its own output naturally
+        research_output = use_browser_agent(research_query)
+        
+        # After research completes, ask user about Quip documentation
+        console.print()
+        quip_response = console.input("[highlight]📝 Would you like to document this research in a Quip document? (y/n): [/highlight]").strip().lower()
+        
+        if quip_response in ['y', 'yes']:
+            # User wants Quip documentation - set up Quip and type the research
+            console.print()
+            console.print("[highlight]📝 Setting up Quip document for research documentation...[/highlight]")
+            
+            # Step 1: Set up Quip for research
+            setup_response = use_computer_agent("setup_quip_for_research")
+            
+            # Step 2: Send research output to computer agent to type up in Quip
+            typing_instructions = f"""You should use the content that the browser agent found to type a paper about the topic in the open new Quip document
+            
+Format it professionally with proper headings, bullet points, and structure. The current view is the left half of the screen is quip, and the right half is the terminal where you are running, click on the left side to type into the quip. Click repeatedly on Untitled then type your title, then type the document. Here is the research content to use in your paper:
+
+{research_output}
+
+Please type this research content into the Quip document that should now be open."""
+            
+            computer_typing_response = use_computer_agent(typing_instructions)
+            
+            console.print()
+            console.print(Panel(
+                "[bold green]✅ Research Documentation Complete![/bold green]\n\n"
+                "✅ Research completed successfully\n"
+                "✅ Quip document set up and opened\n"
+                "✅ Research findings typed into Quip document\n\n"
+                "[bold cyan]Your research is now documented and ready for sharing![/bold cyan]",
+                title="[highlight]📋 Research & Documentation Complete[/highlight]",
+                border_style="green",
+                box=ROUNDED,
+                padding=(1, 2)
+            ))
+            
+        elif quip_response in ['n', 'no']:
+            # User doesn't want Quip documentation - research flow stops here
+            console.print()
+            console.print(Panel(
+                "[bold green]✅ Research Complete![/bold green]\n\n"
+                "[bold cyan]Research findings have been provided above.[/bold cyan]\n"
+                "[bold yellow]Research mode ended as requested - no documentation created.[/bold yellow]",
+                title="[highlight]🔬 Research Complete[/highlight]",
+                border_style="blue",
+                box=ROUNDED,
+                padding=(1, 2)
+            ))
+        else:
+            # Invalid response - default to no documentation
+            console.print()
+            console.print(Panel(
+                "[bold yellow]⚠️ Invalid response - defaulting to no documentation[/bold yellow]\n\n"
+                "[bold green]✅ Research Complete![/bold green]\n"
+                "[bold cyan]Research findings have been provided above.[/bold cyan]",
+                title="[highlight]🔬 Research Complete[/highlight]",
+                border_style="yellow",
+                box=ROUNDED,
+                padding=(1, 2)
+            ))
+        
+        return True
+        
+    except Exception as e:
+        # Only show F.R.A.N.K.I.E. error handling if the browser agent fails
+        console.print()
+        console.print(Panel(
+            f"[danger]Error researching topic:[/danger] `{user_input}`\n[danger]Error:[/danger] {str(e)}\n\n"
+            "[warning]💡 Falling back to normal orchestrator routing...[/warning]",
+            title="[danger]❌ Research Error[/danger]",
+            border_style="red",
+            box=ROUNDED,
+            padding=(1, 2)
         ))
         return False
 
@@ -693,23 +901,28 @@ def main():
                 
                 # Handle special commands
                 if user_input.lower() in ["exit", "quit", "bye"]:
+                    clear_research_mode_state()
                     render_goodbye_message()
                     break
                     
                 elif user_input.lower() in ["help", "?"]:
+                    clear_research_mode_state()
                     show_premium_help()
                     continue
                     
                 elif user_input.lower() in ["shortcuts", "show_shortcuts", "computer_shortcuts", "quick_actions"]:
+                    clear_research_mode_state()
                     show_shortcuts_menu()
                     continue
                     
                 elif user_input.lower() == "clear":
+                    clear_research_mode_state()
                     console.clear()
                     render_premium_welcome()
                     continue
                     
                 elif user_input.startswith("!"):
+                    clear_research_mode_state()
                     # Shell command
                     shell_cmd = user_input[1:].strip()
                     if shell_cmd:
@@ -720,11 +933,17 @@ def main():
                     console.print("[warning]💭 Please enter a command or request. Type 'help' for guidance.[/warning]")
                     continue
                 
+                # Check if we're in post-research-mode state
+                global research_mode_setup_complete
+                if research_mode_setup_complete:
+                    if handle_post_research_mode_input(user_input):
+                        continue
+                    # If research handling failed, fall through to normal processing
+                
                 # Check for computer shortcuts first (before orchestrator)
-                detected_shortcut = detect_computer_shortcut(user_input)
+                detected_shortcut = detect_shortcut(user_input)
                 if detected_shortcut:
-                    # Route directly to computer agent
-                    console.print(f"[highlight]⚡ Auto-routing shortcut:[/highlight] `{detected_shortcut}`")
+                    # Route to computer agent (routing message logic handled in route_shortcut_to_computer)
                     if route_shortcut_to_computer(detected_shortcut):
                         continue
                     # If shortcut routing failed, fall through to orchestrator

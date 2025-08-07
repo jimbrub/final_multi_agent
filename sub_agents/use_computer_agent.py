@@ -98,9 +98,8 @@ def use_computer_agent(query: str) -> str:
         )
     if "start my day" in query.lower():
         setup(computer_agent)
-        # query = "we have just opened kiro and we are on it in full screen, can you click on open a project, then can you click on users, then click on jambrubu, then scroll down on the right side of menu, click on workplace, then click testing_ag_ui, then click open"
-        #query = "we have slack open, can you click on the strands agents interest channel then right click on one of the messages, then click on reply in thread. from the thread info type a response but let me hit enter"
-        return "\n💻 COMPUTER AGENT RESPONSE 💻\n\n✅ Daily setup has been successful! All the user needs to do is touch their security key and your computer should be ready for today's work! No further computer assistance is needed right now.\n"
+        # After setup completes, continue with iTerm automation
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n\n✅ Your daily setup is complete! We have opened the strands-agents-interest channel on Slack, opened your daily to-dos, opened VS Code, and started your security login. You just need to press your yubikey now! \n\n Would you like your work music? (type play my music)\n"        # Don't return here - let the query continue to be processed by the agent below
     if "start demo record" in query.lower():
         print("entered dem record if statement")
         setup_recording(computer_agent)
@@ -114,6 +113,24 @@ def use_computer_agent(query: str) -> str:
         stop_recording(computer_agent)
         # Return immediately after stopping recording - no need to continue processing
         return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Screen recording has been stopped successfully! Recording is now inactive.\n\n🎬 Screen Studio recording has been stopped.\n📹 Recording stop completed.\n\n⚠️  Note: Recording has ended and no further computer assistance is needed right now.\n{'='*50}"
+    if "play my music" in query.lower():
+        print("entered play my music if statement")
+        open_music(computer_agent)
+        # Return immediately after opening music - no need to continue processing
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Music app has been opened successfully! 🎵\n\n🎶 Music app is now open and playing your Terminal Tunes Playlist!\n🎧 Music setup completed.\n\n⚠️  Note: Music is ready and no further computer assistance is needed right now.\n{'='*50}"
+    if "research mode" in query.lower():
+        print("entered research mode if statement")
+        set_research_mode(computer_agent)
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Research mode has been activated successfully! 🔬\n\n🖥️ iTerm terminal is now ready for command-line research.\n🌐 Chromium browser is prepared for web research.\n📊 Research environment setup completed!\n\n⚠️  Note: Research mode is active. You can now begin your research topic.\n{'='*50}"
+    if "start presentation" in query.lower():
+        print("entered start presentation if statement")
+        start_presentation(computer_agent)
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Presentation has been started successfully! 📽️\n\n🎯 PowerPoint is now open and running in presentation mode.\n📊 Presentation setup completed - you're ready to present!\n\n⚠️  Note: Presentation is running and no further computer assistance is needed right now.\n{'='*50}"
+    if "setup_quip_for_research" in query.lower():
+        print("entered setup quip for research if statement")
+        setup_quip_for_research(computer_agent)
+        return "\n💻 COMPUTER AGENT RESPONSE 💻\n{'='*50}\n✅ Quip document setup completed successfully! 📝\n\n📄 New Quip document has been created and is ready for research input.\n🖋️ Document is open and cursor is positioned for typing.\n📋 Research documentation environment is ready!\n\n⚠️  Note: Quip is set up and ready for research content input.\n{'='*50}"
+
     formatted_query = f"""
     Please help me with the following computer automation task. Remember to:
     1. Analyze screen elements carefully before interactions
@@ -148,8 +165,8 @@ def focus_mode(agent):
     # agent.tool.use_computer(action="click", x=1360, y=18) 
     agent.tool.use_computer(action="click", x=1344, y=17)
     time.sleep(.5)
-    agent.tool.use_computer(action="move_mouse",x=1386, y=86) #do not disturb
-    agent.tool.use_computer(action="click",x=1386, y=86) #do not disturb
+    agent.tool.use_computer(action="move_mouse",x=1386, y=123) #do not disturb
+    agent.tool.use_computer(action="click",x=1386, y=123) #do not disturb
     time.sleep(.3)
     agent.tool.use_computer(action="open_app", app_name="clock") 
     time.sleep(1) 
@@ -168,35 +185,67 @@ def focus_mode(agent):
     time.sleep(.3)    
     agent.tool.use_computer(action="click",x=1218, y=633) #start
 
+# def fill_excel_sheet
+
+def open_music(agent):
+    agent.tool.use_computer(action="open_app", app_name="Music")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt", app_name="Music")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right", app_name="Music")    
+
+    time.sleep(2)
+
+    agent.tool.use_computer(action="scroll", x=600, y=156, app_name="Music", scroll_amount="100", scroll_direction="down")
+
+
+    agent.tool.use_computer(action="move_mouse", x=604, y=633, app_name="Music")
+    time.sleep(2)
+    agent.tool.use_computer(action="click", x=604, y=633, app_name="Music") 
+
+    agent.tool.use_computer(action="move_mouse", x=1126, y=381, app_name="Music")
+    time.sleep(2)
+    agent.tool.use_computer(action="click", x=1126, y=381, app_name="Music") 
+
+
+def start_presentation(agent):
+    agent.tool.use_computer(action="open_app", app_name="PowerPoint")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt", app_name="PowerPoint")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+up", app_name="PowerPoint")  
+
+    time.sleep(1)
+
+    agent.tool.use_computer(action="click", click_type="double", x=247, y=375, app_name="PowerPoint")
+
+    time.sleep(2)
+
+    agent.tool.use_computer(action="hotkey", hotkey_str="command+shift+enter", app_name="PowerPoint")  
  
 
-def setup(agent):
-    agent.tool.use_computer(action="open_app", app_name="Chrome")
-    # # time.sleep(1) 
+def setup_quip_for_research(agent):
+    agent.tool.use_computer(action="open_app", app_name="Quip")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt", app_name="Quip")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+left", app_name="Quip") 
+
+    agent.tool.use_computer(action="hotkey", hotkey_str="command+option+n", app_name="Quip") 
+
+ 
+
+
     
-    # # time.sleep(1)
+
+
+def setup(agent):
+
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt", app_name="iTerm")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right", app_name="iTerm") 
+    agent.tool.use_computer(action="open_app", app_name="Chrome")
+    
     agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
     agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+right")
-    # time.sleep(5) 
 
-    # time.sleep(1)
     agent.tool.use_computer(action="move_mouse", x=860, y=136)
     time.sleep(2)
     agent.tool.use_computer(action="click", x=860, y=136)
 
-    #click on plus button
-    agent.tool.use_computer(action="move_mouse", x=1100, y=58)
-    agent.tool.use_computer(action="click", x=1100, y=58)
-
-
-    # agent.tool.use_computer(action="open_app", app_name="Chrome")
-    # agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
-    # agent.tool.use_computer(action="hotkey", hotkey_str="command+t") 
-    time.sleep(3)
-    agent.tool.use_computer(action="type", text="merlon", app_name="Chrome")
-    time.sleep(3)
-    agent.tool.use_computer(action="key_press", key="enter")
- 
     time.sleep(5)
     agent.tool.use_computer(action="open_app", app_name="Slack")
     time.sleep(1)
@@ -224,24 +273,34 @@ def setup(agent):
 
     time.sleep(2)
 
-    agent.tool.use_computer(action="click", x=135, y=18)
-    agent.tool.use_computer(action="click", x=154, y=54)
+    agent.tool.use_computer(action="click", x=135, y=18, app_name="iTerm")
+    agent.tool.use_computer(action="click", x=154, y=54, app_name="iTerm")
     time.sleep(3)
 
     agent.tool.use_computer(action="open_app", app_name="iTerm")
+    time.sleep(1)
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt")
+    agent.tool.use_computer(action="hotkey", hotkey_str="ctrl+alt+left")
+    # agent.tool.use_computer(action="key_press", key="m", app_name="iTerm")
+    # agent.tool.use_computer(action="key_press", key="m", app_name="iTerm")
+    agent.tool.use_computer(action="type", key="m", app_name="iTerm")
+
+
+    agent.tool.use_computer(action="hotkey", hotkey_str="alt+ctrl", app_name="iTerm")
+    time.sleep(1)
+
+
+    agent.tool.use_computer(action="type", text="mwinit", app_name="iTerm")
     time.sleep(3)
 
 
-    agent.tool.use_computer(action="type", text="mwinit")
-    time.sleep(1)
+    agent.tool.use_computer(action="key_press", key="enter", app_name="iTerm")
+    time.sleep(5)
 
-    agent.tool.use_computer(action="key_press", app_name="iTerm", key="enter")
+    agent.tool.use_computer(action="type", text="04132004", app_name="iTerm")
     time.sleep(2)
 
-    agent.tool.use_computer(action="type", text="04132004")
-    time.sleep(2)
-
-    agent.tool.use_computer(action="key_press", key="enter")
+    agent.tool.use_computer(action="key_press", key="enter", app_name="iTerm")
  
  
 
@@ -258,6 +317,14 @@ def stop_recording(agent):
     agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="option+command")
     agent.tool.use_computer(action="hotkey", app_name="Screen Studio", hotkey_str="ctrl+command+shift+s")
 # Interactive loop for standalone usage
+
+def set_research_mode(agent):
+    agent.tool.use_computer(action="hotkey", app_name="iTerm", hotkey_str="alt+ctrl")
+    agent.tool.use_computer(action="hotkey", app_name="iTerm", hotkey_str="alt+ctrl+right")
+
+    agent.tool.use_computer(action="hotkey", app_name="Chromium", hotkey_str="alt+ctrl")
+    agent.tool.use_computer(action="hotkey", app_name="Chromium", hotkey_str="alt+ctrl+left")
+
 if __name__ == "__main__":
     print(f"\n\033[1;36m🌟 Computer Automation Agent 🌟\033\n")
     print("Available commands:")
@@ -281,11 +348,22 @@ if __name__ == "__main__":
             setup_recording(interactive_agent)
             user_input="you just set up and started recording my screen, thanks!"
             break
+        elif user_input.lower() == "play my music": 
+            open_music(interactive_agent)
+            break
         elif user_input.lower() == "stop demo record":
             stop_recording(interactive_agent)
             break
-
+        elif user_input.lower() ==  "research mode":
+            set_research_mode(interactive_agent)
+            break
+        elif user_input.lower() ==  "start presentation":
+            start_presentation(interactive_agent)
+            break
             
+        elif user_input.lower() ==  "setup quip":
+            setup_quip_for_research(interactive_agent)
+            break
         # Use ANSI color codes to make the agent's response stand out
         print("\n\033[1;36m--- Agent Response ---\033[0m")  # Cyan color, bold text
         # if knowledge_base_id:
